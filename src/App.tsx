@@ -1,23 +1,49 @@
-import React from 'react';
-import logo from './logo.svg';
+import React from "react";
+import { useState, useEffect } from 'react';
 import './App.css';
 
+export type item = {
+  userId: number;
+  id: number;
+  title: string;
+  body: string;
+}
+
 function App() {
+  const [items, setItems] = useState<item[]>([]);
+  useEffect(() => {
+    fetch('https://jsonplaceholder.typicode.com/posts')
+      .then((res) => {
+        return res.json();
+      })
+      .then((data) => {
+        console.log(data);
+        setItems(data);
+      });
+  }, []);
+
+  const [searchTerm, setSearchTerm] = useState<string>("");
+
+  const onInputChange = function (event: React.ChangeEvent<HTMLInputElement>) {
+    setSearchTerm(event.target.value)
+  }
+
+  const searchResult = searchTerm && items.length
+    ? items.filter(item => item.title?.includes(searchTerm))
+    : items;
+
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        <input id="search-field" type="text" placeholder="Enter search term" onChange={onInputChange} />
+        <ul>
+          {searchResult.map((item: any, index: number) => (
+            <li key={"item-" + index}>
+              <h2>{item.title}</h2>
+              <p>{item.body}</p>
+            </li>
+          ))}
+        </ul>
       </header>
     </div>
   );
